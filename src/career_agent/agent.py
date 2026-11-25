@@ -45,6 +45,8 @@ def parse_json(text: str) -> dict:
 
 
 MAX_BULLET_CHARS = 120
+NON_BULLET_TYPES = {"skills", "education"}
+_ID_TAG = re.compile(r"\s*[\(\[]\s*#?[A-Z]{2,5}-\d{1,3}\s*[\)\]]")
 
 _NUM = re.compile(r"\d+(?:[.,]\d+)?")
 
@@ -94,6 +96,13 @@ def tailor_to_vacancy(vacancy_text: str, bank: list[dict], llm: str = "databrick
         )},
     ], model=model, temperature=0.2, max_tokens=3000))
 
+    # Post-process: strip id tags the model may put into bullet text; drop non-CV item types.
+    for it in result.get("selected", []):
+        it["bullet"] = _ID_TAG.sub("", it.get("bullet", "")).strip().rstrip(".")
+    result["selected"] = [
+        it for it in result.get("selected", [])
+        if bank_by_id.get(it.get("id"), {}).get("type") not in NON_BULLET_TYPES
+    ]
     result["selected"] = sorted(result.get("selected", []), key=lambda x: -int(x.get("relevance", 0) or 0))
     return {"requirements": req, "result": result, "issues": validate_output(result, bank_by_id)}
 

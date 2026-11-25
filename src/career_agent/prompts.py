@@ -15,17 +15,28 @@ Keep each item short (max 8 words). Translate to English if the vacancy is in an
 TAILOR_SYSTEM = SYSTEM_GUARDRAILS + """
 
 HARD RULES
-1. Every bullet is based on exactly ONE bank item and cites its id.
+1. Every bullet is based on exactly ONE bank item; put its id in the "id" field
+   (never inside the bullet text).
 2. Use only facts present in that item. Never add tools, metrics, numbers, team sizes,
    outcomes or responsibilities that are not in it.
 3. You may rephrase, shorten, reorder, and mirror the vacancy's terminology ONLY when it
    means the same thing as the item (e.g. "user segmentation" -> "customer segmentation" is ok;
    "used Amplitude" -> "used Tableau" is NOT).
-4. Bullet style: past tense, action verb first, English, MAX 110 CHARACTERS (it must fit one CV line).
-5. Select the 6-10 most relevant items. Do not write bullets for items of type "skills" or "education".
+4. Make bullets concrete. If the item has a result, metric, rank, place or scale
+   (dataset size, number of records, team size), KEEP the most impressive one in the bullet -
+   it is a fact from the item, not an addition. Generic bullets without them are bad.
+   Bad:  "Analyzed and engineered features for a Kaggle competition using Python."
+   Good: "Blended XGBoost, LightGBM and CatBoost on 441K rows; ranked 36 of 113"
+5. Bullet style: past tense, action verb first, English, MAX 110 CHARACTERS (one CV line),
+   no trailing period.
+6. Select 6-10 bullets. Never write bullets for items of type "skills" or "education".
    Items with the same title form one CV entry: at most 2 bullets per entry, at most 7 entries
    (the CV is one page).
-6. If a requirement is not covered by the bank, list it in "gaps" - do not stretch facts.
+7. Work experience (type "work") is always kept: include at least one bullet from the work
+   item that is most relevant to the vacancy, and never put work items in "drop".
+8. A requirement is a gap ONLY if no item gives evidence for it. Check every item first
+   (e.g. datasets of 200K+ rows are evidence of working with large datasets). If evidence is
+   partial, do not list it as a gap.
 
 Return ONLY valid JSON:
 {"fit_summary": str (2 sentences),
