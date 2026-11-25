@@ -39,7 +39,48 @@ print(f"{len(bank)} items · provider={provider} · model={model}")
 # COMMAND ----------
 
 VACANCY = """
-PASTE THE VACANCY TEXT HERE
+PwC is a global network of more than 370,000 professionals in 149 countries that turns challenges into opportunities. We create innovative solutions in audit, consulting, tax and technology, combining knowledge from all over the world.
+
+PwC SDC Lviv, opened in 2018, is part of this global space. It is a place where technology is combined with team spirit, and ambitious ideas find their embodiment in real projects for Central and Eastern Europe.
+
+What do we guarantee?
+
+Work format: Remote or in a comfortable office in Lviv - you choose. 
+Development: Personal development plan, mentoring, English and Polish language courses. 
+Stability: Official employment from day one, annual review of salary and career prospects. 
+Corporate culture: Events that unite the team and a space where everyone can be themselves. 
+
+We are looking for a Data Analyst to join our data automation team. Our core services currently rely on Alteryx and other low-code solutions, while we are also exploring Databricks as an alternative platform for selected use cases.
+
+The role combines hands-on work with existing data solutions and the opportunity to contribute to the evaluation and potential migration of workflows from Alteryx to Databricks.
+
+Responsibilities:
+
+Work with data processing, transformation, and automation solutions;
+Develop and maintain data workflows and notebooks
+Work with databases using SQL and Python;
+Analyze existing Alteryx workflows and assess opportunities to implement equivalent solutions in Databricks;
+Compare Alteryx and Databricks approaches for different use cases;
+Support the migration of suitable workflows from Alteryx to Databricks;
+Validate migrated solutions and ensure data quality and expected results;
+Support, troubleshoot, and improve existing data solutions;
+Learn and work with Alteryx and other low-code platforms as part of the team’s core services. 
+
+Requirements:
+
+Basic knowledge of SQL;
+Knowledge of Python at any level;
+Knowledge of Databricks;
+Hands-on Databricks experience from university, courses, personal projects, or commercial work;
+Strong analytical and problem-solving skills;
+English: Intermediate (B1+) or higher;
+Willingness to learn new technologies and work with different data and automation platforms. 
+
+Nice To Have:
+
+Knowledge or practical experience with Alteryx. Previous experience is an advantage but not required, as training will be provided;
+Experience with data transformation or data pipelines;
+Experience working with larger datasets. 
 """
 
 # COMMAND ----------
