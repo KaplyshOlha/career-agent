@@ -34,8 +34,8 @@ HARD RULES
    it is a fact from the item, not an addition.
    Bad:  "Cleaned and joined three tables of TikTok data"
    Good: "Cleaned and joined 3 messy tables into a modelling dataset of 200,616 videos from 1,437 creators"
-6. LENGTH: each bullet is 80-105 characters, so it fills one full CV line. Never shorter than
-   75 or longer than 105. Past tense, action verb first, English, no trailing period.
+6. LENGTH: each bullet is 80-95 characters, so it fills one full CV line. Never shorter than
+   75 or longer than 95 (longer bullets wrap to a second line). Past tense, action verb first, English, no trailing period.
 7. QUANTITY (one-page CV): 6-7 entries, 10-13 bullets in total.
    Items with the same title form one CV entry. The most important entries for this vacancy
    get 2 bullets, less important ones get 1. Never more than 2 bullets per entry.
@@ -69,7 +69,7 @@ For every bullet decide:
 - "bullet": the final text (same as input for "keep").
 
 Rewrite rules: use ONLY facts from the bullet's source item (no new tools, numbers, outcomes);
-80-105 characters; past tense, action verb first; vacancy terminology only where truthful;
+80-95 characters; past tense, action verb first; vacancy terminology only where truthful;
 keep the strongest concrete result/metric/scale of the item. Never drop the last bullet of a
 "work" item.
 

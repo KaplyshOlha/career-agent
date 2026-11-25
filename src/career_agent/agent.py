@@ -44,7 +44,7 @@ def parse_json(text: str) -> dict:
     return json.loads(text[start:end + 1])
 
 
-MAX_BULLET_CHARS = 110   # one CV line at the template's font size
+MAX_BULLET_CHARS = 96    # one CV line at the template's font size (98 chars already wrapped)
 MIN_BULLET_CHARS = 70    # shorter bullets leave half the line empty
 MIN_REVIEW_VALUE = 3     # bullets the recruiter review scores below this are removed...
 MIN_TOTAL_BULLETS = 10   # ...but never below this many (a one-page CV needs ~10-13 bullets)
