@@ -34,7 +34,7 @@
       ]
     },
     "result": {
-      "fit_summary": "The candidate has relevant experience with Databricks, SQL, and Python, and has worked on projects involving data analysis and processing. However, some key requirements like Alteryx experience and large datasets experience are not directly met.",
+      "fit_summary": "The candidate has relevant experience with Databricks, SQL, Python, and data analysis, but lacks direct experience with Alteryx and migration to Databricks. They have worked with large datasets and shown analytical skills.",
       "fit_score": 7,
       "selected": [
         {
@@ -44,16 +44,7 @@
             "Databricks knowledge",
             "SQL knowledge"
           ],
-          "bullet": "Wrote SQL queries on Databricks to answer business questions. (#LKH-01)"
-        },
-        {
-          "id": "LKH-02",
-          "relevance": 5,
-          "matched_requirements": [
-            "Databricks knowledge",
-            "Data quality check"
-          ],
-          "bullet": "Set up metric monitoring with alerts on Databricks. (#LKH-02)"
+          "bullet": "Wrote SQL queries on Databricks gold layer to answer business questions"
         },
         {
           "id": "CAG-01",
@@ -62,84 +53,133 @@
             "Databricks knowledge",
             "Python knowledge"
           ],
-          "bullet": "Built an LLM agent on Databricks using Python. (#CAG-01)"
+          "bullet": "Built LLM agent on Databricks Free Edition with Python"
         },
         {
           "id": "KGL-01",
           "relevance": 4,
           "matched_requirements": [
             "Python knowledge",
-            "Analytical skills"
+            "Large datasets experience"
           ],
-          "bullet": "Analyzed and engineered features for a Kaggle competition using Python. (#KGL-01)"
+          "bullet": "Blended XGBoost, LightGBM and CatBoost on 441K rows; ranked 36 of 113"
         },
         {
-          "id": "TTK-02",
+          "id": "TTK-01",
           "relevance": 4,
           "matched_requirements": [
             "Python knowledge",
             "Data transformation"
           ],
-          "bullet": "Engineered 106 features for a TikTok performance prediction project. (#TTK-02)"
+          "bullet": "Cleaned and joined three tables of TikTok data"
         },
         {
           "id": "GEN-01",
           "relevance": 4,
           "matched_requirements": [
             "Python knowledge",
-            "Analytical skills"
+            "Large datasets experience"
           ],
-          "bullet": "Analyzed payment transactions and built Tableau dashboards. (#GEN-01)"
+          "bullet": "Analyzed 566K payment transactions with Python"
         },
         {
-          "id": "EDU-01",
+          "id": "VRB-02",
+          "relevance": 4,
+          "matched_requirements": [
+            "Analytical skills",
+            "Python knowledge"
+          ],
+          "bullet": "Defined data-based churn-risk threshold and re-engagement segment"
+        },
+        {
+          "id": "VRB-03",
+          "relevance": 4,
+          "matched_requirements": [
+            "Analytical skills",
+            "Python knowledge"
+          ],
+          "bullet": "Designed A/B test for push-notification campaign"
+        },
+        {
+          "id": "LKH-02",
           "relevance": 4,
           "matched_requirements": [
             "Databricks knowledge",
-            "SQL knowledge",
-            "Python knowledge"
+            "Data quality check"
           ],
-          "bullet": "Completed coursework in Big Data Processing Technologies using Databricks and SQL. (#EDU-01)"
+          "bullet": "Set up metric monitoring with alert on Databricks"
         }
       ],
       "drop": [
         {
-          "id": "VRB-01",
-          "reason": "Not directly relevant to the Data Analyst role requirements."
-        },
-        {
           "id": "NTM-01",
-          "reason": "Not directly relevant to the Data Analyst role requirements."
+          "reason": "Not relevant to Data Analyst role"
         },
         {
           "id": "CLB-01",
-          "reason": "Leadership experience, not directly relevant to the Data Analyst role."
+          "reason": "Leadership role, not directly relevant to Data Analyst technical skills"
+        },
+        {
+          "id": "FLX-01",
+          "reason": "Not directly related to data analysis or required tools"
+        },
+        {
+          "id": "UKR-01",
+          "reason": "Case study, not directly related to required technical skills"
+        },
+        {
+          "id": "SAM-01",
+          "reason": "Marketing case, not directly related to data analysis role"
         }
       ],
       "gaps": [
         {
           "requirement": "Alteryx experience",
-          "note": "The candidate lacks direct experience with Alteryx."
+          "note": "No direct experience with Alteryx mentioned"
         },
         {
-          "requirement": "Large datasets experience",
-          "note": "While the candidate has worked with sizable datasets, 'large datasets' is not explicitly mentioned."
+          "requirement": "Migration to Databricks",
+          "note": "No experience with migration to Databricks mentioned"
         }
       ]
     },
     "issues": [
-      "[LKH-01] numbers not in source: ['01'] -> Wrote SQL queries on Databricks to answer business questions. (#LKH-01)",
-      "[LKH-02] numbers not in source: ['02'] -> Set up metric monitoring with alerts on Databricks. (#LKH-02)",
-      "[CAG-01] numbers not in source: ['01'] -> Built an LLM agent on Databricks using Python. (#CAG-01)",
-      "[KGL-01] numbers not in source: ['01'] -> Analyzed and engineered features for a Kaggle competition using Python. (#KGL-01)",
-      "[TTK-02] numbers not in source: ['02'] -> Engineered 106 features for a TikTok performance prediction project. (#TTK-02)",
-      "[GEN-01] numbers not in source: ['01'] -> Analyzed payment transactions and built Tableau dashboards. (#GEN-01)",
-      "[EDU-01] numbers not in source: ['01'] -> Completed coursework in Big Data Processing Technologies using Databricks and SQL. (#EDU-01)"
+      "[GEN-01] numbers not in source: ['566'] -> Analyzed 566K payment transactions with Python"
     ]
   },
   "cv_layout": {
     "headline": "Data Analyst",
     "sections": {
+      "EXPERIENCE": [
+        {
+          "section": "EXPERIENCE",
+          "header": "Product Manager | Verba",
+          "period": "Jun 2026 – Oct 2026",
+          "bullets": [
+            {
+              "id": "VRB-02",
+              "text": "Defined data-based churn-risk threshold and re-engagement segment"
+            },
+            {
+              "id": "VRB-03",
+              "text": "Designed A/B test for push-notification campaign"
+            }
+          ],
+          "ids": [
+            "VRB-02",
+            "VRB-03"
+          ],
+          "relevance": 4,
+          "skills": [
+            "Retention Analysis",
+            "Churn Analysis",
+            "User Segmentation",
+            "Amplitude",
+            "CRM / Push Notifications",
+            "A/B Testing"
+          ]
+        }
+      ],
       "PROJECTS": [
         {
           "section": "PROJECTS",
@@ -148,11 +188,11 @@
           "bullets": [
             {
               "id": "LKH-01",
-              "text": "Wrote SQL queries on Databricks to answer business questions. (#LKH-01)"
+              "text": "Wrote SQL queries on Databricks gold layer to answer business questions"
             },
             {
               "id": "LKH-02",
-              "text": "Set up metric monitoring with alerts on Databricks. (#LKH-02)"
+              "text": "Set up metric monitoring with alert on Databricks"
             }
           ],
           "ids": [
@@ -176,7 +216,7 @@
           "bullets": [
             {
               "id": "CAG-01",
-              "text": "Built an LLM agent on Databricks using Python. (#CAG-01)"
+              "text": "Built LLM agent on Databricks Free Edition with Python"
             }
           ],
           "ids": [
@@ -199,7 +239,7 @@
           "bullets": [
             {
               "id": "KGL-01",
-              "text": "Analyzed and engineered features for a Kaggle competition using Python. (#KGL-01)"
+              "text": "Blended XGBoost, LightGBM and CatBoost on 441K rows; ranked 36 of 113"
             }
           ],
           "ids": [
@@ -221,19 +261,20 @@
           "period": "Oct 2026 – present",
           "bullets": [
             {
-              "id": "TTK-02",
-              "text": "Engineered 106 features for a TikTok performance prediction project. (#TTK-02)"
+              "id": "TTK-01",
+              "text": "Cleaned and joined three tables of TikTok data"
             }
           ],
           "ids": [
-            "TTK-02"
+            "TTK-01"
           ],
           "relevance": 4,
           "skills": [
             "Python",
-            "Feature Engineering",
-            "Leakage Control",
-            "pandas"
+            "pandas",
+            "Data Cleaning",
+            "EDA",
+            "Target Design"
           ]
         },
         {
@@ -243,7 +284,7 @@
           "bullets": [
             {
               "id": "GEN-01",
-              "text": "Analyzed payment transactions and built Tableau dashboards. (#GEN-01)"
+              "text": "Analyzed 566K payment transactions with Python"
             }
           ],
           "ids": [
@@ -263,36 +304,38 @@
     },
     "drop": [
       {
-        "id": "VRB-01",
-        "reason": "Not directly relevant to the Data Analyst role requirements."
-      },
-      {
         "id": "NTM-01",
-        "reason": "Not directly relevant to the Data Analyst role requirements."
+        "reason": "Not relevant to Data Analyst role"
       },
       {
         "id": "CLB-01",
-        "reason": "Leadership experience, not directly relevant to the Data Analyst role."
+        "reason": "Leadership role, not directly relevant to Data Analyst technical skills"
+      },
+      {
+        "id": "FLX-01",
+        "reason": "Not directly related to data analysis or required tools"
+      },
+      {
+        "id": "UKR-01",
+        "reason": "Case study, not directly related to required technical skills"
+      },
+      {
+        "id": "SAM-01",
+        "reason": "Marketing case, not directly related to data analysis role"
       }
     ],
     "gaps": [
       {
         "requirement": "Alteryx experience",
-        "note": "The candidate lacks direct experience with Alteryx."
+        "note": "No direct experience with Alteryx mentioned"
       },
       {
-        "requirement": "Large datasets experience",
-        "note": "While the candidate has worked with sizable datasets, 'large datasets' is not explicitly mentioned."
+        "requirement": "Migration to Databricks",
+        "note": "No experience with migration to Databricks mentioned"
       }
     ],
     "issues": [
-      "[LKH-01] numbers not in source: ['01'] -> Wrote SQL queries on Databricks to answer business questions. (#LKH-01)",
-      "[LKH-02] numbers not in source: ['02'] -> Set up metric monitoring with alerts on Databricks. (#LKH-02)",
-      "[CAG-01] numbers not in source: ['01'] -> Built an LLM agent on Databricks using Python. (#CAG-01)",
-      "[KGL-01] numbers not in source: ['01'] -> Analyzed and engineered features for a Kaggle competition using Python. (#KGL-01)",
-      "[TTK-02] numbers not in source: ['02'] -> Engineered 106 features for a TikTok performance prediction project. (#TTK-02)",
-      "[GEN-01] numbers not in source: ['01'] -> Analyzed payment transactions and built Tableau dashboards. (#GEN-01)",
-      "[EDU-01] numbers not in source: ['01'] -> Completed coursework in Big Data Processing Technologies using Databricks and SQL. (#EDU-01)"
+      "[GEN-01] numbers not in source: ['566'] -> Analyzed 566K payment transactions with Python"
     ]
   }
 }
