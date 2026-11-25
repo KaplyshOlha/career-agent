@@ -32,10 +32,15 @@ src/career_agent/
     bank.py                    load bank (private volume → sample fallback), write Delta
     prompts.py                 prompt templates + guardrails
     agent.py                   vacancy → experience agent + output validator
+app.yaml                       Databricks App entry point (Streamlit)
+app/
+    app.py                     tabs: Paste vacancy · New matches · Settings
+    db.py                      SQL warehouse access: bank, per-user preferences, matches
 notebooks/
     00_egress_test.ipynb          which external domains serverless can reach
     01_setup.ipynb                schema, volume, LLM endpoints check, bank → Delta
     02_tailor_cv.ipynb            paste a vacancy → tailored bullets, items to drop, gaps, CV layout
+    03_app_setup.ipynb            preferences table + grants for the app's service principal
 outputs/                       agent results as JSON (written by 02_tailor_cv.ipynb)
 ```
 
@@ -70,6 +75,26 @@ falls back to `data/experience_bank.sample.json`, so the project runs end-to-end
    # also: gemini_api_key, telegram_bot_token, telegram_chat_id
    ```
 
+
+## Databricks App (Streamlit UI)
+
+Tabs: **📝 Paste vacancy** (runs the agent, shows the report, CV layout and a JSON download for Canva) ·
+**🔔 New matches** (filled by the daily job — roadmap) · **⚙️ Settings** (per-user preferences: target roles,
+level, remote/cities, min salary, stop words, excluded industries, Telegram chat_id, LLM provider/model).
+Each signed-in user gets their own settings row (keyed by the `X-Forwarded-Email` header) in
+`workspace.career_agent.preferences`.
+
+Deploy (Free Edition allows 1 app; it stops after 24 h — start it again before a demo):
+
+1. **Compute → Apps → Create app → Custom app**, name `career-agent`.
+2. In the app's **Resources**, add:
+   - *SQL warehouse* (the Serverless Starter Warehouse), permission **Can use**, key **`sql-warehouse`**;
+   - *Serving endpoint* `databricks-llama-4-maverick` (or the model you use), permission **Can query**.
+3. Run `notebooks/03_app_setup.ipynb` — creates the `preferences` table and grants the app's
+   service principal `USE CATALOG` + `USE SCHEMA, SELECT, MODIFY` on `workspace.career_agent`.
+4. App page → **Deploy** → source code path = this Git folder (e.g. `/Workspace/Users/<you>/career-agent`).
+5. Open the app URL.
+
 ## Guardrails
 
 - Prompt rules: one bullet = one source item; no new tools, metrics, numbers or outcomes; vacancy terminology only where truthful.
@@ -79,13 +104,13 @@ falls back to `data/experience_bank.sample.json`, so the project runs end-to-end
 
 ## Roadmap
 
-- [ ] 0. Egress test
-- [ ] 1. Experience bank → Delta
-- [ ] 2. Agent "vacancy → experience" (whole bank in prompt)
+- [x] 0. Egress test
+- [x] 1. Experience bank → Delta
+- [x] 2. Agent "vacancy → experience" (whole bank in prompt) + recruiter review
 - [ ] 3. Model eval (MLflow): relevance, hallucination, sounds-like-me
 - [ ] 4. RSS ingestion Job (DOU, Djinni)
 - [ ] 5. Matching + notifications
-- [ ] 6. Streamlit Databricks App
+- [x] 6. Streamlit Databricks App (Paste vacancy, Settings; New matches waits for step 5)
 - [ ] 7. Vector index (AI Search)
 - [ ] 8. Canva Autofill API (needs a Canva plan with Autofill)
 

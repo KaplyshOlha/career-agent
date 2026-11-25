@@ -29,8 +29,18 @@ PROVIDERS = {
 
 
 def _get_secret(key: str) -> str:
-    from databricks.sdk.runtime import dbutils  # available inside Databricks
-    return dbutils.secrets.get(SECRET_SCOPE, key)
+    """Notebook: dbutils. Databricks App / local: env var (e.g. GROQ_API_KEY) or the Secrets API."""
+    import os
+    if os.getenv(key.upper()):
+        return os.environ[key.upper()]
+    try:
+        from databricks.sdk.runtime import dbutils  # available inside notebooks
+        return dbutils.secrets.get(SECRET_SCOPE, key)
+    except Exception:
+        import base64
+        from databricks.sdk import WorkspaceClient
+        value = WorkspaceClient().secrets.get_secret(SECRET_SCOPE, key).value
+        return base64.b64decode(value).decode()
 
 
 def get_llm(name: str = "databricks", model: str | None = None) -> tuple[OpenAI, str]:
