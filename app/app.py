@@ -114,8 +114,8 @@ with tab_matches:
                 c1.markdown(f"**[{m['title']}]({m['url']})** · {m.get('company') or ''} · "
                             f"{m.get('location') or ''} · _{m['source']}_")
                 c1.write(m.get("reason") or "")
-                matched = list(m.get("matched") or [])
-                gaps = list(m.get("gaps") or [])
+                matched = db.as_list(m.get("matched"))
+                gaps = db.as_list(m.get("gaps"))
                 if matched:
                     c1.caption("✅ " + " · ".join(matched))
                 if gaps:

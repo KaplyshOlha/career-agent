@@ -33,11 +33,22 @@ def query(statement: str, params: dict | None = None) -> list[dict]:
         return [dict(zip(cols, row)) for row in cur.fetchall()]
 
 
+def as_list(v) -> list:
+    """ARRAY columns arrive as numpy arrays (or JSON strings): never use `v or []` on them."""
+    if v is None:
+        return []
+    if isinstance(v, str):
+        try:
+            v = json.loads(v)
+        except Exception:
+            return [v]
+    return [str(x) for x in list(v) if x is not None]
+
+
 def load_bank() -> list[dict]:
     rows = query(f"SELECT * FROM {BANK_TABLE}")
-    for r in rows:  # ARRAY columns may arrive as numpy arrays / strings
-        if r.get("skills") is not None and not isinstance(r["skills"], (list, str)):
-            r["skills"] = list(r["skills"])
+    for r in rows:
+        r["skills"] = as_list(r.get("skills"))
     return rows
 
 
@@ -77,10 +88,14 @@ def load_matches(user_email: str, limit: int = 100) -> list[dict] | None:
     """Scored vacancies for this user (written by notebooks/04_find_vacancies).
     None if the table doesn't exist yet / no access."""
     try:
-        return query(
+        rows = query(
             f"""SELECT score, title, company, location, source, reason, matched, gaps, url, published, scored_at
                 FROM {MATCHES_TABLE} WHERE user_email = :email
                 ORDER BY scored_at DESC, score DESC LIMIT {int(limit)}""",
             {"email": user_email})
     except Exception:
         return None
+    for r in rows:
+        r["matched"], r["gaps"] = as_list(r.get("matched")), as_list(r.get("gaps"))
+        r["score"] = int(r.get("score") or 0)
+    return rows
