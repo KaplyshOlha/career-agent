@@ -48,8 +48,14 @@ def get_llm(name: str = "databricks", model: str | None = None) -> tuple[OpenAI,
     return client, model or cfg["model"]
 
 
-def chat(name: str, messages: list[dict], **kwargs) -> str:
+def chat(name: str, messages: list[dict], model: str | None = None, **kwargs) -> str:
     """Convenience wrapper: one chat completion, returns the text."""
-    client, model = get_llm(name)
+    client, model = get_llm(name, model)
     resp = client.chat.completions.create(model=model, messages=messages, **kwargs)
-    return resp.choices[0].message.content
+    content = resp.choices[0].message.content
+    # Some Databricks endpoints (e.g. gpt-oss) return a list of blocks incl. reasoning.
+    if isinstance(content, list):
+        content = "".join(
+            b.get("text", "") for b in content if isinstance(b, dict) and b.get("type") == "text"
+        )
+    return content or ""

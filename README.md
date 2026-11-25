@@ -31,10 +31,11 @@ src/career_agent/
     llm.py                     get_llm(name): swappable OpenAI-compatible providers
     bank.py                    load bank (private volume → sample fallback), write Delta
     prompts.py                 prompt templates + guardrails
-    agent.py                   vacancy → experience agent
+    agent.py                   vacancy → experience agent + output validator
 notebooks/
     00_egress_test.py          which external domains serverless can reach
     01_setup.py                schema, volume, LLM endpoints check, bank → Delta
+    02_tailor_cv.py            paste a vacancy → tailored bullets, items to drop, gaps (logged to MLflow)
 ```
 
 Logic lives in `src/`; notebooks only orchestrate, so the same code is reused by Jobs and the App.
@@ -52,7 +53,10 @@ falls back to `data/experience_bank.sample.json`, so the project runs end-to-end
 3. Run `notebooks/01_setup.py`: creates `workspace.career_agent` schema + `raw` volume, lists LLM endpoints,
    loads the bank into `workspace.career_agent.experience_bank`.
    If the default model is missing, update `PROVIDERS` in `src/career_agent/llm.py`.
-4. *(Optional, for external LLMs / notifications)* create secrets in a notebook **outside** the repo:
+4. Open `notebooks/02_tailor_cv.py`, choose provider/model in the widgets, paste a vacancy into `VACANCY`, Run all.
+   Output: tailored bullets with source ids, items to remove for this vacancy, skill gaps,
+   and validation warnings (unknown ids, numbers not present in the source item).
+5. *(Optional, for external LLMs / notifications)* create secrets in a notebook **outside** the repo:
 
    ```python
    from databricks.sdk import WorkspaceClient
@@ -61,6 +65,12 @@ falls back to `data/experience_bank.sample.json`, so the project runs end-to-end
    w.secrets.put_secret("career-agent", "groq_api_key", string_value="...")
    # also: gemini_api_key, telegram_bot_token, telegram_chat_id
    ```
+
+## Guardrails
+
+- Prompt rules: one bullet = one source item; no new tools, metrics, numbers or outcomes; vacancy terminology only where truthful.
+- `raw_text` is never sent to the model (it may contain notes the owner chose not to use).
+- Post-check (`validate_output`): flags unknown ids and any number in a bullet that is absent from its source item.
 
 ## Roadmap
 
