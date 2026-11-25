@@ -2,7 +2,7 @@
 
 Tabs:
   • Paste vacancy — tailor the experience bank to a vacancy (same agent as notebooks/02_tailor_cv)
-  • New matches   — vacancies scored by the daily job (roadmap)
+  • New matches   — vacancies scored by the daily job (notebooks/04_find_vacancies)
   • Settings      — per-user job-search preferences, stored in workspace.career_agent.preferences
 """
 import json
@@ -98,14 +98,29 @@ with tab_vac:
 
 # -------------------------------------------------------------------- New matches --
 with tab_matches:
-    matches = db.load_matches()
+    matches = db.load_matches(user)
     if matches is None:
-        st.info("The daily DOU / Djinni matching job is the next build step. "
-                "Once it runs, scored vacancies appear here, filtered by your ⚙️ Settings.")
+        st.info("No matches yet. Run `notebooks/04_find_vacancies` (or schedule it daily): it fetches DOU / Djinni, "
+                "filters by your ⚙️ Settings and scores each vacancy against your experience bank.")
     elif not matches:
-        st.write("No matches yet.")
+        st.write("No matches yet for your account.")
     else:
-        st.dataframe(matches, use_container_width=True)
+        min_score = st.slider("Minimum fit score", 1, 10, 6)
+        rows = [m for m in matches if (m.get("score") or 0) >= min_score]
+        st.caption(f"{len(rows)} of {len(matches)} scored vacancies · newest first")
+        for m in rows:
+            with st.container(border=True):
+                c1, c2 = st.columns([5, 1])
+                c1.markdown(f"**[{m['title']}]({m['url']})** · {m.get('company') or ''} · "
+                            f"{m.get('location') or ''} · _{m['source']}_")
+                c1.write(m.get("reason") or "")
+                matched = list(m.get("matched") or [])
+                gaps = list(m.get("gaps") or [])
+                if matched:
+                    c1.caption("✅ " + " · ".join(matched))
+                if gaps:
+                    c1.caption("⚠️ gaps: " + " · ".join(gaps))
+                c2.metric("Fit", f"{m['score']}/10")
 
 # ----------------------------------------------------------------------- Settings --
 with tab_settings:

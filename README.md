@@ -41,6 +41,10 @@ notebooks/
     01_setup.ipynb                schema, volume, LLM endpoints check, bank → Delta
     02_tailor_cv.ipynb            paste a vacancy → tailored bullets, items to drop, gaps, CV layout
     03_app_setup.ipynb            preferences table + grants for the app's service principal
+    04_find_vacancies.ipynb       daily job: DOU/Djinni RSS → prefilter → LLM fit score → matches (+ Telegram)
+config/feeds.yaml              RSS feeds to poll
+scripts/fetch_feeds.py         RSS snapshot for the GitHub Action fallback
+feeds/                         daily RSS snapshots (written by .github/workflows/fetch_feeds.yml)
 outputs/                       agent results as JSON (written by 02_tailor_cv.ipynb)
 ```
 
@@ -95,6 +99,28 @@ Deploy (Free Edition allows 1 app; it stops after 24 h — start it again before
 4. App page → **Deploy** → source code path = this Git folder (e.g. `/Workspace/Users/<you>/career-agent`).
 5. Open the app URL.
 
+
+## Vacancy search (daily job)
+
+`notebooks/04_find_vacancies` — for the signed-in user (their ⚙️ Settings from the app, else
+`config/preferences.yaml`):
+
+1. **Fetch** every feed in `config/feeds.yaml` (DOU, Djinni). Fallback chain, because Free Edition
+   serverless may block job sites: direct HTTP → GitHub raw snapshot → snapshot in the Git folder.
+   The snapshot is made daily by the GitHub Action `fetch_feeds.yml` (also runnable by hand:
+   Actions → *Fetch vacancy feeds* → *Run workflow*).
+2. **Store** new vacancies in `vacancies` (dedup by URL).
+3. **Prefilter** with hard rules from Settings (stop words in the title, excluded industries,
+   cities / remote; Ukrainian city names understood) and a keyword relevance score
+   (experience-bank skills found in the vacancy + target-role words in the title).
+4. **LLM fit score** for the top N new vacancies (default 20): score 1–10, reason, matched skills,
+   gaps; non-junior roles are capped at 4.
+5. **Save** to `matches` (per user) → shown in the app's 🔔 New matches tab.
+6. **Telegram** (optional): matches with score ≥ 7, if secret `career-agent/telegram_bot_token`
+   exists and a chat_id is set in Settings.
+
+Schedule it: open the notebook → **Schedule** → daily (e.g. 08:00).
+
 ## Guardrails
 
 - Prompt rules: one bullet = one source item; no new tools, metrics, numbers or outcomes; vacancy terminology only where truthful.
@@ -108,9 +134,9 @@ Deploy (Free Edition allows 1 app; it stops after 24 h — start it again before
 - [x] 1. Experience bank → Delta
 - [x] 2. Agent "vacancy → experience" (whole bank in prompt) + recruiter review
 - [ ] 3. Model eval (MLflow): relevance, hallucination, sounds-like-me
-- [ ] 4. RSS ingestion Job (DOU, Djinni)
-- [ ] 5. Matching + notifications
-- [x] 6. Streamlit Databricks App (Paste vacancy, Settings; New matches waits for step 5)
+- [x] 4. RSS ingestion Job (DOU, Djinni) with GitHub Action fallback
+- [x] 5. Matching (rules + keyword prefilter + LLM score) + Telegram notifications
+- [x] 6. Streamlit Databricks App (Paste vacancy, New matches, Settings)
 - [ ] 7. Vector index (AI Search)
 - [ ] 8. Canva Autofill API (needs a Canva plan with Autofill)
 

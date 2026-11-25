@@ -7,7 +7,7 @@ from databricks import sql
 from databricks.sdk.core import Config
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-from career_agent.config import load_preferences, table  # noqa: E402
+from career_agent.config import default_prefs as config_default_prefs, table  # noqa: E402
 
 BANK_TABLE = table("experience_bank")
 PREFS_TABLE = table("preferences")
@@ -50,21 +50,7 @@ DEFAULT_PREFS = {
 
 
 def default_prefs() -> dict:
-    """Defaults from config/preferences.yaml (repo), flattened to the app's schema."""
-    try:
-        y = load_preferences() or {}
-    except Exception:
-        y = {}
-    loc = y.get("location") or {}
-    return {**DEFAULT_PREFS,
-            "target_roles": y.get("target_roles") or [],
-            "level": y.get("level") or [],
-            "remote": loc.get("remote", True),
-            "cities": loc.get("cities") or [],
-            "languages": y.get("languages") or [],
-            "stop_words": y.get("stop_words") or [],
-            "excluded_industries": y.get("excluded_industries") or [],
-            "min_salary_usd": y.get("min_salary_usd")}
+    return {**DEFAULT_PREFS, **config_default_prefs()}
 
 
 def get_prefs(user_email: str) -> dict:
@@ -87,9 +73,14 @@ def save_prefs(user_email: str, prefs: dict) -> None:
 
 
 # -------------------------------------------------------------------- matches --
-def load_matches(limit: int = 50) -> list[dict] | None:
-    """Top vacancy matches (filled by the daily job, roadmap step 5). None if the table doesn't exist yet."""
+def load_matches(user_email: str, limit: int = 100) -> list[dict] | None:
+    """Scored vacancies for this user (written by notebooks/04_find_vacancies).
+    None if the table doesn't exist yet / no access."""
     try:
-        return query(f"SELECT * FROM {MATCHES_TABLE} ORDER BY score DESC LIMIT {int(limit)}")
+        return query(
+            f"""SELECT score, title, company, location, source, reason, matched, gaps, url, published, scored_at
+                FROM {MATCHES_TABLE} WHERE user_email = :email
+                ORDER BY scored_at DESC, score DESC LIMIT {int(limit)}""",
+            {"email": user_email})
     except Exception:
         return None

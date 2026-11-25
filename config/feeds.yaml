@@ -1,0 +1,16 @@
+# RSS feeds polled by the daily vacancy job (notebooks/04_find_vacancies) and by the
+# GitHub Action snapshot (.github/workflows/fetch_feeds.yml). Edit freely.
+# LinkedIn is intentionally absent (ToS): paste LinkedIn vacancies into the app manually.
+
+dou:
+  - https://jobs.dou.ua/vacancies/feeds/?category=Data%20Science
+  - https://jobs.dou.ua/vacancies/feeds/?category=Analyst
+  - https://jobs.dou.ua/vacancies/feeds/?search=data%20analyst
+  - https://jobs.dou.ua/vacancies/feeds/?search=product%20analyst
+  - https://jobs.dou.ua/vacancies/feeds/?search=business%20analyst
+
+djinni:
+  - https://djinni.co/jobs/rss/?primary_keyword=Data%20Analyst
+  - https://djinni.co/jobs/rss/?primary_keyword=Data%20Science
+  - https://djinni.co/jobs/rss/?primary_keyword=Business%20Analyst
+  - https://djinni.co/jobs/rss/?keywords=product%20analyst
