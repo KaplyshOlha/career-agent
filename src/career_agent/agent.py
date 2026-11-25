@@ -3,7 +3,7 @@ import json
 import re
 
 from .llm import chat
-from .prompts import EXTRACT_SYSTEM, REVIEW_SYSTEM, TAILOR_SYSTEM
+from .prompts import EXTRACT_SYSTEM, REVIEW_SYSTEM, SHORTEN_SYSTEM, TAILOR_SYSTEM
 
 # raw_text is intentionally NOT sent to the model: it may hold notes or numbers
 # the owner decided not to use in a CV.
@@ -134,8 +134,39 @@ def tailor_to_vacancy(vacancy_text: str, bank: list[dict], llm: str = "databrick
         result["selected"], result["review"] = review_bullets(
             vacancy_text, req, result["selected"], bank_by_id, llm=llm, model=model)
 
+    # Step 4: models often ignore length limits -> shorten over-long bullets in one extra call.
+    result["selected"] = shorten_bullets(result["selected"], llm=llm, model=model)
+
     result["selected"] = sorted(result["selected"], key=lambda x: -int(x.get("relevance", 0) or 0))
     return {"requirements": req, "result": result, "issues": validate_output(result, bank_by_id)}
+
+
+def shorten_bullets(selected: list[dict], llm: str = "databricks", model: str | None = None) -> list[dict]:
+    """Ask the model to shorten bullets longer than MAX_BULLET_CHARS; keep the original
+    unless the short version fits the line and keeps every number of the original."""
+    long_idx = [i for i, s in enumerate(selected) if len(s.get("bullet", "")) > MAX_BULLET_CHARS]
+    if not long_idx:
+        return selected
+    payload = "\n".join(f"#{i}: {selected[i]['bullet']}" for i in long_idx)
+    try:
+        res = parse_json(chat(llm, [
+            {"role": "system", "content": SHORTEN_SYSTEM},
+            {"role": "user", "content": payload},
+        ], model=model, temperature=0.0, max_tokens=1500))
+    except Exception:
+        return selected
+    out = list(selected)
+    for r in res.get("bullets", []):
+        try:
+            i = int(r.get("index"))
+        except (TypeError, ValueError):
+            continue
+        if i not in long_idx:
+            continue
+        new = _ID_TAG.sub("", r.get("bullet", "")).strip().rstrip(".")
+        if MIN_BULLET_CHARS <= len(new) <= MAX_BULLET_CHARS and _numbers(out[i]["bullet"]) <= _numbers(new):
+            out[i] = {**out[i], "bullet": new, "shortened_from": out[i]["bullet"]}
+    return out
 
 
 def _clean(selected: list[dict], bank_by_id: dict) -> list[dict]:

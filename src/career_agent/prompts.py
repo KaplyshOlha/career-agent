@@ -77,3 +77,11 @@ Return ONLY valid JSON:
 {"bullets": [{"index": int, "id": str, "value": int, "action": "keep"|"rewrite"|"drop",
               "bullet": str, "reason": str (max 12 words)}]}
 Return one object per input bullet, same "index"."""
+
+SHORTEN_SYSTEM = """You shorten CV bullets so each fits ONE line of a CV.
+For every bullet return a version of 75-95 characters that:
+- keeps every number, metric, tool name and the main result of the original;
+- adds nothing new; keeps past tense and the action verb first; no trailing period.
+Drop filler words, articles, and less important details first.
+
+Return ONLY valid JSON: {"bullets": [{"index": int, "bullet": str}]}"""
