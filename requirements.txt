@@ -1,0 +1,5 @@
+openai>=1.40
+databricks-sdk>=0.30
+feedparser>=6.0
+pyyaml>=6.0
+requests>=2.31

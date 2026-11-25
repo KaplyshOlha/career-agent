@@ -1,0 +1,26 @@
+# Job-search preferences used for vacancy prefiltering and scoring.
+# Keep sensitive values (e.g. expected salary) out of this public file:
+# put them in Databricks Secrets and read them at runtime.
+
+target_roles:
+  - Junior Data Scientist
+  - Junior Data Analyst
+  - Product Analyst
+  - Business Analyst
+
+level: [intern, junior]
+
+location:
+  remote: true
+  cities: [Lviv, Kyiv]
+
+languages: [English, Ukrainian]
+
+stop_words:
+  - senior
+  - lead
+  - head of
+
+excluded_industries: []
+
+min_salary_usd: null   # set via secret `career-agent/min_salary_usd` if needed
