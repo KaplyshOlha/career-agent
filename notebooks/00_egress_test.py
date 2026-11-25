@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
 # MAGIC %md
 # MAGIC # 00 · Egress test
 # MAGIC Databricks Free Edition limits outbound internet on serverless compute.
