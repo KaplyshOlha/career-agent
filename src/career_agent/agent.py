@@ -48,11 +48,32 @@ MAX_BULLET_CHARS = 120
 NON_BULLET_TYPES = {"skills", "education"}
 _ID_TAG = re.compile(r"\s*[\(\[]\s*#?[A-Z]{2,5}-\d{1,3}\s*[\)\]]")
 
-_NUM = re.compile(r"\d+(?:[.,]\d+)?")
+_NUM = re.compile(r"(\d+(?:\.\d+)?)\s*([KkMm])?(?![\w])|(\d+(?:\.\d+)?)")
+_THOUSANDS = re.compile(r"(?<=\d),(?=\d{3}\b)")
 
 
-def _numbers(s: str) -> set[str]:
-    return {n.replace(",", ".") for n in _NUM.findall(s or "")}
+def _numbers(s: str) -> set[float]:
+    """Numbers in text; '566,414' -> 566414, '441K' -> 441000."""
+    out = set()
+    for num, suffix, plain in _NUM.findall(_THOUSANDS.sub("", s or "")):
+        v = float(num or plain)
+        if suffix:
+            v *= 1_000 if suffix.lower() == "k" else 1_000_000
+        out.add(v)
+    return out
+
+
+def _unsupported_numbers(bullet: str, source: str) -> list[float]:
+    """Numbers in the bullet that are not in the source (rounding like 566,414 -> 566K is allowed)."""
+    src = _numbers(source)
+    bad = []
+    for v in _numbers(bullet):
+        if v in src:
+            continue
+        if v >= 1000 and any(abs(n - v) / v < 0.01 for n in src):  # rounded abbreviation
+            continue
+        bad.append(v)
+    return sorted(bad)
 
 
 def validate_output(result: dict, bank_by_id: dict) -> list[str]:
@@ -65,7 +86,7 @@ def validate_output(result: dict, bank_by_id: dict) -> list[str]:
             continue
         src = bank_by_id[rid]
         src_text = " ".join(str(src.get(k, "")) for k in ["title", "company", "period", *PROMPT_FIELDS])
-        extra = _numbers(item.get("bullet", "")) - _numbers(src_text)
+        extra = _unsupported_numbers(item.get("bullet", ""), src_text)
         if extra:
             issues.append(f"[{rid}] numbers not in source: {sorted(extra)} -> {item['bullet']}")
         if len(item.get("bullet", "")) > MAX_BULLET_CHARS:
