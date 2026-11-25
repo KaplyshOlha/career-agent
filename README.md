@@ -74,7 +74,8 @@ falls back to `data/experience_bank.sample.json`, so the project runs end-to-end
 
 - Prompt rules: one bullet = one source item; no new tools, metrics, numbers or outcomes; vacancy terminology only where truthful.
 - `raw_text` is never sent to the model (it may contain notes the owner chose not to use).
-- Post-check (`validate_output`): flags unknown ids and any number in a bullet that is absent from its source item.
+- Recruiter review (3rd LLM call): every bullet is scored 1–5 for its value for THIS vacancy; weak bullets are rewritten from the same source item or dropped (work experience is never removed completely).
+- Post-check (`validate_output`): flags unknown ids, any number in a bullet that is absent from its source item, and bullets too short/long for one CV line.
 
 ## Roadmap
 
