@@ -10,7 +10,7 @@ LLM agent on **Databricks Free Edition** that:
 ## Architecture
 
 ```
-[vacancy text] ──► agent.ipynb ──► LLM (Databricks Serving / Groq / Gemini)
+[vacancy text] ──► agent.py ──► LLM (Databricks Serving / Groq / Gemini)
                       │ ▲
                       ▼ │
          Delta: workspace.career_agent.experience_bank
@@ -27,15 +27,15 @@ LLM agent on **Databricks Free Edition** that:
 config/preferences.yaml        target roles, level, location, stop-words
 data/experience_bank.sample.json   fictional sample bank (public)
 src/career_agent/
-    config.ipynb                  catalog/schema/volume names, paths
-    llm.ipynb                     get_llm(name): swappable OpenAI-compatible providers
-    bank.ipynb                    load bank (private volume → sample fallback), write Delta
-    prompts.ipynb                 prompt templates + guardrails
-    agent.ipynb                   vacancy → experience agent + output validator
+    config.py                  catalog/schema/volume names, paths
+    llm.py                     get_llm(name): swappable OpenAI-compatible providers
+    bank.py                    load bank (private volume → sample fallback), write Delta
+    prompts.py                 prompt templates + guardrails
+    agent.py                   vacancy → experience agent + output validator
 notebooks/
     00_egress_test.ipynb          which external domains serverless can reach
     01_setup.ipynb                schema, volume, LLM endpoints check, bank → Delta
-    02_tailor_cv.ipynb          paste a vacancy → tailored bullets, items to drop, gaps, CV layout
+    02_tailor_cv.ipynb            paste a vacancy → tailored bullets, items to drop, gaps, CV layout
 outputs/                       agent results as JSON (written by 02_tailor_cv.ipynb)
 ```
 
@@ -53,7 +53,7 @@ falls back to `data/experience_bank.sample.json`, so the project runs end-to-end
 2. Run `notebooks/00_egress_test.ipynb` on Serverless compute.
 3. Run `notebooks/01_setup.ipynb`: creates `workspace.career_agent` schema + `raw` volume, lists LLM endpoints,
    loads the bank into `workspace.career_agent.experience_bank`.
-   If the default model is missing, update `PROVIDERS` in `src/career_agent/llm.ipynb`.
+   If the default model is missing, update `PROVIDERS` in `src/career_agent/llm.py`.
 4. Open `notebooks/02_tailor_cv.ipynb`, choose provider/model in the widgets, paste a vacancy into `VACANCY`, Run all.
    Output: tailored bullets with source ids, items to remove for this vacancy, skill gaps,
    and validation warnings (unknown ids, numbers not present in the source item).
