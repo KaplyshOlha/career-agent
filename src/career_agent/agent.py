@@ -46,7 +46,8 @@ def parse_json(text: str) -> dict:
 
 MAX_BULLET_CHARS = 110   # one CV line at the template's font size
 MIN_BULLET_CHARS = 70    # shorter bullets leave half the line empty
-MIN_REVIEW_VALUE = 3     # bullets the recruiter review scores below this are removed
+MIN_REVIEW_VALUE = 3     # bullets the recruiter review scores below this are removed...
+MIN_TOTAL_BULLETS = 10   # ...but never below this many (a one-page CV needs ~10-13 bullets)
 NON_BULLET_TYPES = {"skills", "education"}
 _ID_TAG = re.compile(r"\s*[\(\[]\s*#?[A-Z]{2,5}-\d{1,3}\s*[\)\]]")
 
@@ -54,9 +55,13 @@ _NUM = re.compile(r"(\d+(?:\.\d+)?)\s*([KkMm])?(?![\w])|(\d+(?:\.\d+)?)")
 _THOUSANDS = re.compile(r"(?<=\d),(?=\d{3}\b)")
 
 
+_WORD_NUMS = {w: i for i, w in enumerate(
+    "zero one two three four five six seven eight nine ten eleven twelve".split())}
+
+
 def _numbers(s: str) -> set[float]:
-    """Numbers in text; '566,414' -> 566414, '441K' -> 441000."""
-    out = set()
+    """Numbers in text; '566,414' -> 566414, '441K' -> 441000, 'three' -> 3."""
+    out = {float(v) for w, v in _WORD_NUMS.items() if re.search(rf"\b{w}\b", (s or "").lower())}
     for num, suffix, plain in _NUM.findall(_THOUSANDS.sub("", s or "")):
         v = float(num or plain)
         if suffix:
@@ -143,6 +148,12 @@ def _clean(selected: list[dict], bank_by_id: dict) -> list[dict]:
     return out
 
 
+def _accept_rewrite(draft: str, new: str) -> bool:
+    """A rewrite must still fill one CV line and keep every number (fact) of the draft."""
+    return (MIN_BULLET_CHARS + 5 <= len(new) <= MAX_BULLET_CHARS
+            and _numbers(draft) <= _numbers(new))
+
+
 def review_bullets(vacancy_text: str, req: dict, selected: list[dict], bank_by_id: dict,
                    llm: str = "databricks", model: str | None = None) -> tuple[list[dict], list[dict]]:
     """LLM-as-recruiter pass. Returns (final bullets, review log)."""
@@ -161,6 +172,7 @@ def review_bullets(vacancy_text: str, req: dict, selected: list[dict], bank_by_i
     except Exception as e:  # review is an improvement step; never lose the draft because of it
         return selected, [{"error": f"review failed: {e}"}]
 
+    dropped: list[dict] = []
     by_index = {int(r.get("index", -1)): r for r in rev.get("bullets", []) if str(r.get("index", "")).lstrip("-").isdigit()}
     final, log = [], []
     for i, s in enumerate(selected):
@@ -172,10 +184,28 @@ def review_bullets(vacancy_text: str, req: dict, selected: list[dict], bank_by_i
         log.append({"id": s["id"], "draft": s["bullet"], "value": value, "action": r.get("action"),
                     "final": r.get("bullet"), "reason": r.get("reason")})
         if r.get("action") == "drop" or value < MIN_REVIEW_VALUE:
+            dropped.append({**s, "value": value})
             continue
         if r.get("action") == "rewrite" and r.get("bullet"):
-            s = {**s, "bullet": _ID_TAG.sub("", r["bullet"]).strip().rstrip("."), "rewritten": True}
+            new = _ID_TAG.sub("", r["bullet"]).strip().rstrip(".")
+            if _accept_rewrite(s["bullet"], new):
+                s = {**s, "bullet": new, "rewritten": True}
+            else:
+                log[-1]["action"] = "rewrite_rejected"
         final.append({**s, "value": value})
+
+    # The reviewer may not shrink the CV below MIN_TOTAL_BULLETS: restore the best dropped drafts.
+    def shown(bullets):  # bullets that will actually appear in the CV (max 2 per entry)
+        per_entry: dict = {}
+        for b in bullets:
+            t = bank_by_id[b["id"]].get("title")
+            per_entry[t] = per_entry.get(t, 0) + 1
+        return sum(min(2, n) for n in per_entry.values())
+
+    for d in sorted(dropped, key=lambda x: (-x["value"], -int(x.get("relevance", 0) or 0))):
+        if shown(final) >= MIN_TOTAL_BULLETS:
+            break
+        final.append({**d, "restored": True})
 
     # Safety net: work experience is never removed completely.
     work_ids = {s["id"] for s in selected if bank_by_id[s["id"]].get("type") == "work"}
@@ -200,12 +230,14 @@ def render_markdown(out: dict, bank: list[dict]) -> str:
     if res.get("gaps"):
         md += ["", "### Gaps (not in the bank)"] + \
               [f"- **{g.get('requirement')}** — {g.get('note', '')}" for g in res["gaps"]]
-    changed = [r for r in res.get("review", []) if r.get("action") in ("rewrite", "drop") or "error" in r]
+    changed = [r for r in res.get("review", []) if r.get("action") in ("rewrite", "rewrite_rejected", "drop") or "error" in r]
     if changed:
         md += ["", "### Recruiter review (changed bullets)"]
         for r in changed:
             if "error" in r:
                 md.append(f"- ⚠️ {r['error']}")
+            elif r["action"] == "rewrite_rejected":
+                md.append(f"- ↩️ [{r['id']}] rewrite rejected (shorter or lost facts), draft kept: {r['draft']}")
             elif r["action"] == "drop":
                 md.append(f"- ❌ [{r['id']}] value {r['value']}/5 — {r.get('reason')}: ~~{r['draft']}~~")
             else:
@@ -256,7 +288,9 @@ def build_cv_layout(out: dict, bank: list[dict], vacancy_text: str = "") -> dict
     vac = vacancy_text.lower()
     entries: dict[str, dict] = {}
 
-    for s in out["result"].get("selected", []):
+    ranked = sorted(out["result"].get("selected", []),
+                    key=lambda x: (-int(x.get("value") or 0), -int(x.get("relevance") or 0)))
+    for s in ranked:
         src = bank_by_id.get(s.get("id"))
         if not src or SECTION_BY_TYPE.get(src.get("type")) is None:
             continue
