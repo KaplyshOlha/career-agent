@@ -35,7 +35,8 @@ src/career_agent/
 notebooks/
     00_egress_test.py          which external domains serverless can reach
     01_setup.py                schema, volume, LLM endpoints check, bank → Delta
-    02_tailor_cv.py            paste a vacancy → tailored bullets, items to drop, gaps (logged to MLflow)
+    02_tailor_cv.py            paste a vacancy → tailored bullets, items to drop, gaps, CV layout
+outputs/                       agent results as JSON (written by 02_tailor_cv.py)
 ```
 
 Logic lives in `src/`; notebooks only orchestrate, so the same code is reused by Jobs and the App.
@@ -56,6 +57,9 @@ falls back to `data/experience_bank.sample.json`, so the project runs end-to-end
 4. Open `notebooks/02_tailor_cv.py`, choose provider/model in the widgets, paste a vacancy into `VACANCY`, Run all.
    Output: tailored bullets with source ids, items to remove for this vacancy, skill gaps,
    and validation warnings (unknown ids, numbers not present in the source item).
+   The result is also grouped into a one-page CV layout (sections → entries → ≤2 bullets + skills)
+   and saved to `outputs/<date>_<company>-<role>.json`. The layout is then filled into a Canva CV
+   template (currently via Claude with the Canva connector; Canva Autofill API is on the roadmap).
 5. *(Optional, for external LLMs / notifications)* create secrets in a notebook **outside** the repo:
 
    ```python
@@ -82,6 +86,7 @@ falls back to `data/experience_bank.sample.json`, so the project runs end-to-end
 - [ ] 5. Matching + notifications
 - [ ] 6. Streamlit Databricks App
 - [ ] 7. Vector index (AI Search)
+- [ ] 8. Canva Autofill API (needs a Canva plan with Autofill)
 
 ## Constraints (Free Edition)
 

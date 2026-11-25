@@ -25,7 +25,7 @@ sys.path.append(os.path.abspath("../src"))
 
 from career_agent.llm import PROVIDERS
 from career_agent.bank import read_bank
-from career_agent.agent import tailor_to_vacancy, render_markdown
+from career_agent.agent import tailor_to_vacancy, render_markdown, build_cv_layout, render_cv_text
 
 dbutils.widgets.dropdown("provider", "databricks", list(PROVIDERS))
 dbutils.widgets.text("model", "")  # empty = provider default from llm.py
@@ -86,9 +86,38 @@ Experience working with larger datasets.
 # COMMAND ----------
 
 out = tailor_to_vacancy(VACANCY, bank, llm=provider, model=model)
+layout = build_cv_layout(out, bank, VACANCY)
 
 import markdown as _md
 displayHTML(_md.markdown(render_markdown(out, bank)))
+
+# COMMAND ----------
+
+# MAGIC %md ### CV layout (same order and shape as the Canva template)
+
+# COMMAND ----------
+
+print(render_cv_text(layout))
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Save output to the repo (`outputs/`)
+# MAGIC Notebook cell outputs are not stored in git, so the result is written to a file.
+# MAGIC Commit & push it from the Git folder to share it.
+# MAGIC ⚠️ The repo is public: these files contain tailored CV bullets (no contact data).
+
+# COMMAND ----------
+
+import json, re, datetime
+
+slug = re.sub(r"[^a-z0-9]+", "-", f"{out['requirements'].get('company', '')}-{out['requirements'].get('title', '')}".lower()).strip("-")[:60]
+os.makedirs("../outputs", exist_ok=True)
+path = f"../outputs/{datetime.date.today()}_{slug or 'vacancy'}.json"
+with open(path, "w", encoding="utf-8") as f:
+    json.dump({"provider": provider, "model": model, "vacancy": VACANCY.strip(),
+               "agent_output": out, "cv_layout": layout}, f, ensure_ascii=False, indent=2)
+print("Saved:", os.path.abspath(path))
 
 # COMMAND ----------
 
@@ -106,4 +135,5 @@ with mlflow.start_run(run_name=f"{provider}:{model}"):
         "n_issues": len(out["issues"]),
     })
     mlflow.log_dict(out, "output.json")
+    mlflow.log_dict(layout, "cv_layout.json")
     mlflow.log_text(VACANCY, "vacancy.txt")

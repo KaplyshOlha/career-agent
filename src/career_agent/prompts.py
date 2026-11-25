@@ -21,8 +21,10 @@ HARD RULES
 3. You may rephrase, shorten, reorder, and mirror the vacancy's terminology ONLY when it
    means the same thing as the item (e.g. "user segmentation" -> "customer segmentation" is ok;
    "used Amplitude" -> "used Tableau" is NOT).
-4. Bullet style: past tense, action verb first, max 30 words, English.
+4. Bullet style: past tense, action verb first, English, MAX 110 CHARACTERS (it must fit one CV line).
 5. Select the 6-10 most relevant items. Do not write bullets for items of type "skills" or "education".
+   Items with the same title form one CV entry: at most 2 bullets per entry, at most 7 entries
+   (the CV is one page).
 6. If a requirement is not covered by the bank, list it in "gaps" - do not stretch facts.
 
 Return ONLY valid JSON:

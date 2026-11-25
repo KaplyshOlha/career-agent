@@ -44,6 +44,8 @@ def parse_json(text: str) -> dict:
     return json.loads(text[start:end + 1])
 
 
+MAX_BULLET_CHARS = 120
+
 _NUM = re.compile(r"\d+(?:[.,]\d+)?")
 
 
@@ -64,6 +66,8 @@ def validate_output(result: dict, bank_by_id: dict) -> list[str]:
         extra = _numbers(item.get("bullet", "")) - _numbers(src_text)
         if extra:
             issues.append(f"[{rid}] numbers not in source: {sorted(extra)} -> {item['bullet']}")
+        if len(item.get("bullet", "")) > MAX_BULLET_CHARS:
+            issues.append(f"[{rid}] bullet longer than {MAX_BULLET_CHARS} chars (won't fit one CV line)")
     return issues
 
 
@@ -112,3 +116,78 @@ def render_markdown(out: dict, bank: list[dict]) -> str:
     if out["issues"]:
         md += ["", "### ⚠️ Validation issues"] + [f"- {i}" for i in out["issues"]]
     return "\n".join(md)
+
+
+# ---------------------------------------------------------------- CV layout --
+# Maps bank item types to CV sections (matches the one-page Canva template).
+SECTION_BY_TYPE = {
+    "work": "EXPERIENCE",
+    "project": "PROJECTS", "competition": "PROJECTS", "case": "PROJECTS",
+    "leadership": "VOLUNTEERING", "volunteering": "VOLUNTEERING",
+}
+SECTION_ORDER = ["EXPERIENCE", "PROJECTS", "VOLUNTEERING"]
+MAX_SKILLS = 6
+
+
+def _entry_header(item: dict) -> str:
+    if item.get("type") == "work":
+        return f"{item.get('role', '')} | {item.get('title', '')}"
+    return item.get("title", "")
+
+
+def build_cv_layout(out: dict, bank: list[dict], vacancy_text: str = "") -> dict:
+    """Group selected bullets into CV entries (by item title) and sections.
+
+    Skills per entry come only from the cited items' own skill lists; skills mentioned
+    in the vacancy are ranked first.
+    """
+    bank_by_id = {r["id"]: r for r in bank}
+    vac = vacancy_text.lower()
+    entries: dict[str, dict] = {}
+
+    for s in out["result"].get("selected", []):
+        src = bank_by_id.get(s.get("id"))
+        if not src or SECTION_BY_TYPE.get(src.get("type")) is None:
+            continue
+        key = src.get("title", s["id"])
+        e = entries.setdefault(key, {
+            "section": SECTION_BY_TYPE[src["type"]],
+            "header": _entry_header(src),
+            "period": src.get("period", ""),
+            "bullets": [], "ids": [], "_skills": [], "relevance": 0,
+        })
+        if len(e["bullets"]) >= 2:
+            continue
+        e["bullets"].append({"id": s["id"], "text": s.get("bullet", "")})
+        e["ids"].append(s["id"])
+        e["relevance"] = max(e["relevance"], int(s.get("relevance", 0) or 0))
+        for sk in _as_list(src.get("skills")):
+            if sk not in e["_skills"]:
+                e["_skills"].append(sk)
+
+    sections = {name: [] for name in SECTION_ORDER}
+    for e in sorted(entries.values(), key=lambda x: -x["relevance"]):
+        skills = e.pop("_skills")
+        e["skills"] = sorted(skills, key=lambda sk: sk.lower() not in vac)[:MAX_SKILLS]  # stable sort
+        sections[e["section"]].append(e)
+
+    return {
+        "headline": out["requirements"].get("title", ""),
+        "sections": {k: v for k, v in sections.items() if v},
+        "drop": out["result"].get("drop", []),
+        "gaps": out["result"].get("gaps", []),
+        "issues": out["issues"],
+    }
+
+
+def render_cv_text(layout: dict) -> str:
+    """Plain text in the order and shape of the CV template (easy to paste or to fill in Canva)."""
+    lines = [f"HEADLINE: {layout['headline']}", ""]
+    for section, entries in layout["sections"].items():
+        lines.append(section)
+        for e in entries:
+            lines.append(f"{e['header']}    {e['period']}")
+            lines += [f"  • {b['text']}  [{b['id']}]" for b in e["bullets"]]
+            lines.append(f"  Skills: {' | '.join(e['skills'])}")
+        lines.append("")
+    return "\n".join(lines)
