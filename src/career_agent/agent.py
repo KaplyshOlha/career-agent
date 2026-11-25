@@ -159,6 +159,20 @@ SECTION_ORDER = ["EXPERIENCE", "PROJECTS", "VOLUNTEERING"]
 MAX_SKILLS = 6
 
 
+MAX_SKILLS_LINE_CHARS = 100  # "Skills: a | b | c" must fit one CV line
+
+
+def _fit_skills(skills: list[str]) -> list[str]:
+    """Greedy: keep skills in priority order, skip ones that would overflow the line."""
+    out = []
+    for sk in skills:
+        if len(out) >= MAX_SKILLS:
+            break
+        if len("Skills: " + " | ".join(out + [sk])) <= MAX_SKILLS_LINE_CHARS:
+            out.append(sk)
+    return out
+
+
 def _entry_header(item: dict) -> str:
     if item.get("type") == "work":
         return f"{item.get('role', '')} | {item.get('title', '')}"
@@ -198,7 +212,7 @@ def build_cv_layout(out: dict, bank: list[dict], vacancy_text: str = "") -> dict
     sections = {name: [] for name in SECTION_ORDER}
     for e in sorted(entries.values(), key=lambda x: -x["relevance"]):
         skills = e.pop("_skills")
-        e["skills"] = sorted(skills, key=lambda sk: sk.lower() not in vac)[:MAX_SKILLS]  # stable sort
+        e["skills"] = _fit_skills(sorted(skills, key=lambda sk: sk.lower() not in vac))  # stable sort
         sections[e["section"]].append(e)
 
     return {
