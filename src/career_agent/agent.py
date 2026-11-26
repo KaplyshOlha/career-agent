@@ -254,13 +254,21 @@ def render_markdown(out: dict, bank: list[dict]) -> str:
           "### Tailored bullets"]
     for s in res.get("selected", []):
         src = bank_by_id.get(s.get("id"), {})
-        md.append(f"- {s.get('bullet')}  \n  _[{s.get('id')}] {src.get('title', '?')} · "
-                  f"relevance {s.get('relevance')}/5 · recruiter value {s.get('value', '–')}/5{' · rewritten' if s.get('rewritten') else ''} · covers: {', '.join(s.get('matched_requirements', []))}_")
+        tags = [f"[{s.get('id')}] {src.get('title', '?')}", f"relevance {s.get('relevance')}/5",
+                f"recruiter value {s.get('value', '–')}/5"]
+        if s.get("rewritten"):
+            tags.append("rewritten")
+        if s.get("restored"):
+            tags.append("restored (keeps CV ≥ 10 bullets)")
+        if s.get("matched_requirements"):
+            tags.append("covers: " + ", ".join(s["matched_requirements"]))
+        md.append(f"- {s.get('bullet')}  \n  _{' · '.join(tags)}_")
     if res.get("drop"):
         md += ["", "### Remove for this vacancy"] + [f"- [{d.get('id')}] {d.get('reason')}" for d in res["drop"]]
     if res.get("gaps"):
         md += ["", "### Gaps (not in the bank)"] + \
               [f"- **{g.get('requirement')}** — {g.get('note', '')}" for g in res["gaps"]]
+    restored_ids = {x["id"] for x in res.get("selected", []) if x.get("restored")}
     changed = [r for r in res.get("review", []) if r.get("action") in ("rewrite", "rewrite_rejected", "drop") or "error" in r]
     if changed:
         md += ["", "### Recruiter review (changed bullets)"]
@@ -269,6 +277,9 @@ def render_markdown(out: dict, bank: list[dict]) -> str:
                 md.append(f"- ⚠️ {r['error']}")
             elif r["action"] == "rewrite_rejected":
                 md.append(f"- ↩️ [{r['id']}] rewrite rejected (shorter or lost facts), draft kept: {r['draft']}")
+            elif r["action"] == "drop" and r["id"] in restored_ids:
+                md.append(f"- ↩️ [{r['id']}] reviewer dropped it (value {r['value']}/5: {r.get('reason')}), "
+                          f"restored to keep the CV at ≥ 10 bullets")
             elif r["action"] == "drop":
                 md.append(f"- ❌ [{r['id']}] value {r['value']}/5 — {r.get('reason')}: ~~{r['draft']}~~")
             else:
