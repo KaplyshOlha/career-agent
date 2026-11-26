@@ -7,6 +7,8 @@ LLM agent on **Databricks Free Edition** that:
 
 > LinkedIn is not scraped (ToS); LinkedIn vacancies can only be pasted manually.
 
+📊 **Presentation:** [slides on Canva](https://canva.link/ijvwsj6ysjph8lv)
+
 ## Architecture
 
 ```
